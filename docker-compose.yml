@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:17
+    container_name: sentinelx-db
+    restart: always
+    environment:
+      POSTGRES_USER: sentinelx
+      POSTGRES_PASSWORD: sentinelx
+      POSTGRES_DB: sentinelx_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
