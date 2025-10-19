@@ -3,7 +3,7 @@ const RegisterRequestBody = {
     firstName: { type: 'string' },
     lastName: { type: 'string' },
     email: { type: 'string', format: 'email' },
-    passwordHash: { type: 'string', format: 'password' },
+    passwordHash: { type: 'string', format: 'password', minLength: 8 },
     role: { type: 'string' }
   }
 }

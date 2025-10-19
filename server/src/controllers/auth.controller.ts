@@ -1,15 +1,19 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { registerUser, loginUser } from '@/services/auth.service'
+import logger from '@/config/logger'
 
-export const handleRegister = async (req: Request, res: Response) => {
+export const handleRegister = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const methodName = 'handleRegister'
   try {
     const newUser = await registerUser(req.body)
     res.status(201).json(newUser)
   } catch (e: any) {
-    if (e.code === 'P2002') {
-      return res.status(409).json({ message: 'Email already exists.' })
-    }
-    res.status(500).json({ message: 'An error ocurred during registration' })
+    logger.error(`Error in ${methodName}`)
+    next(e)
   }
 }
 

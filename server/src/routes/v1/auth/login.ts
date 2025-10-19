@@ -1,6 +1,5 @@
-import { Request, Response } from 'express'
 import { handleLogin } from '@/controllers/auth.controller'
+import { validate } from '@/middleware/validate'
+import { loginSchema } from '@/schemas/v1/auth.schema'
 
-export const post = async (req: Request, res: Response) => {
-  await handleLogin(req, res)
-}
+export const post = [validate(loginSchema), handleLogin]

@@ -1,6 +1,7 @@
 import { Express } from 'express'
 import { glob } from 'glob'
 import path from 'path'
+import logger from '@/config/logger'
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
 const httpMethods: HttpMethod[] = ['get', 'post', 'put', 'delete', 'patch']
@@ -12,7 +13,7 @@ const httpMethods: HttpMethod[] = ['get', 'post', 'put', 'delete', 'patch']
  * @param app The Express application instance.
  */
 export const loadRoutes = async (app: Express): Promise<void> => {
-  console.log('🔄 Loading routes...')
+  logger.info('🔄 Loading routes...')
 
   // Use glob to find all .ts files under the routes directory, excluding test files.
   const routeFiles = await glob('src/routes/**/*.ts', {
@@ -34,14 +35,13 @@ export const loadRoutes = async (app: Express): Promise<void> => {
     // Check for exported functions that match our defined HTTP methods.
     for (const method of httpMethods) {
       if (routeHandlers[method]) {
-        // If a handler for the method exists (e.g., export const post = ...),
-        // register it with the Express app for the generated URL path.
-        app[method](urlPath, routeHandlers[method])
+        const handlers = [routeHandlers[method]].flat()
+        app[method](urlPath, ...handlers)
 
         // Log the successful registration for debugging and confirmation.
-        console.log(`✅ Registered route: ${method.toUpperCase()} ${urlPath}`)
+        logger.info(`✅ Registered route: ${method.toUpperCase()} ${urlPath}`)
       }
     }
   }
-  console.log('🚀 Route loading complete.')
+  logger.info('🚀 Route loading complete.')
 }

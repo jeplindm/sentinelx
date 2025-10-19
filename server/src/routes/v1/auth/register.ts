@@ -1,7 +1,5 @@
-import { Request, Response } from 'express'
-
 import { handleRegister } from '@/controllers/auth.controller'
+import { registerSchema } from '@/schemas/v1/auth.schema'
+import { validate } from '@/middleware/validate'
 
-export const post = async (req: Request, res: Response) => {
-  await handleRegister(req, res)
-}
+export const post = [validate(registerSchema), handleRegister]

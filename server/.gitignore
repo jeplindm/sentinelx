@@ -1,1 +1,10 @@
-node_modules
+# Env
+.env
+
+# Node
+node_modules/
+dist/
+
+# Logs
+logs/
+*.log

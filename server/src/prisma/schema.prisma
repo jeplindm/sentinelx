@@ -9,6 +9,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- ENUMS ---
+
+enum Role {
+  ADMIN
+  STAFF
+  EMPLOYEE
+}
+
+enum AssetStatus {
+  IN_STORAGE
+  ASSIGNED
+  IN_REPAIR
+  RETIRED
+}
+
+enum LicenseType {
+  PER_USER
+  PER_DEVICE
+}
+
+// --- MODELS ---
+
 model User {
   id            Int      @id @default(autoincrement())
   firstName     String   @map("first_name")
@@ -18,10 +40,107 @@ model User {
   role          Role     @default(EMPLOYEE)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // --- Relationships ---
+  assetsAssignedTo    AssetAssignment[] @relation("AssetAssignedToUser")
+  assetsAssignedBy    AssetAssignment[] @relation("AssetAssignedByUser")
+  licensesAssignedToMe LicenseAssignment[]
 }
 
-enum Role {
-  ADMIN
-  STAFF
-  EMPLOYEE
+model Asset {
+  id              Int         @id @default(autoincrement())
+  assetTag        String      @unique @map("asset_tag")
+  name            String
+  serialNumber    String?     @map("serial_number") // Optional
+  status          AssetStatus @default(IN_STORAGE)
+  purchaseDate    DateTime?   @map("purchase_date")
+  purchaseCost    Decimal?    @map("purchase_cost")
+  warrantyExpiry  DateTime?   @map("warranty_expiry")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  // --- Relationships ---
+  categoryId      Int?
+  category        Category?   @relation(fields: [categoryId], references: [id])
+
+  manufacturerId  Int?
+  manufacturer    Manufacturer? @relation(fields: [manufacturerId], references: [id])
+
+  supplierId      Int?
+  supplier        Supplier?   @relation(fields: [supplierId], references: [id])
+
+  locationId      Int?
+  location        Location?   @relation(fields: [locationId], references: [id])
+
+  assignments     AssetAssignment[]
+}
+
+model AssetAssignment {
+  id                  Int       @id @default(autoincrement())
+  checkoutDate        DateTime  @default(now()) @map("checkout_date")
+  checkinDate         DateTime? @map("checkin_date") // Nullable
+  notes               String?
+
+  // --- Relationships ---
+  assetId             Int
+  asset               Asset     @relation(fields: [assetId], references: [id])
+
+  assignedToUserId    Int
+  assignedToUser      User      @relation("AssetAssignedToUser", fields: [assignedToUserId], references: [id])
+
+  assignedByUserId    Int
+  assignedByUser      User      @relation("AssetAssignedByUser", fields: [assignedByUserId], references: [id])
+}
+
+model License {
+  id            Int         @id @default(autoincrement())
+  name          String
+  licenseType   LicenseType @map("license_type")
+  totalSeats    Int         @map("total_seats")
+  purchaseCost  Decimal?    @map("purchase_cost")
+  renewalDate   DateTime?   @map("renewal_date")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  // --- Relationships ---
+  assignments   LicenseAssignment[]
+}
+
+model LicenseAssignment {
+  id            Int       @id @default(autoincrement())
+  assignedDate  DateTime  @default(now()) @map("assigned_date")
+
+  // --- Relationships ---
+  licenseId     Int
+  license       License   @relation(fields: [licenseId], references: [id])
+
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+
+// --- HELPER TABLES ---
+
+model Category {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  assets Asset[]
+}
+
+model Manufacturer {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  assets Asset[]
+}
+
+model Supplier {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  assets Asset[]
+}
+
+model Location {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  assets Asset[]
 }
