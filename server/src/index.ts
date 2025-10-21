@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import morgan from 'morgan'
+import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './config/swagger'
 import { loadRoutes } from './utils/loadRoutes'
@@ -14,6 +15,13 @@ const startServer = async () => {
   const PORT = process.env.PORT || 3001
 
   app.use(express.json())
+
+  const corsOptions = {
+    origin: true, // Allow all origins (great for development)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }
+  app.use(cors(corsOptions))
 
   const stream: morgan.StreamOptions = {
     write: (message) => logger.http(message.trim())

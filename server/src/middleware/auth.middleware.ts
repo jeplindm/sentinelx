@@ -7,7 +7,7 @@ import logger from '@/config/logger'
 export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization
-    if (authHeader) throw new AuthError('No auth token provided')
+    if (!authHeader) throw new AuthError('No auth token provided')
 
     const token = authHeader?.split(' ')[1]
     if (!token) throw new AuthError('Malformed auth token')
